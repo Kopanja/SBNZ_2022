@@ -1,0 +1,143 @@
+//created on: Apr 17, 2022
+package integracija
+
+//list any import classes here.
+import com.valorant.clip.editor.valorantclip.model.Kill;
+import com.valorant.clip.editor.valorantclip.model.Round;
+import java.util.List;
+import com.valorant.clip.editor.valorantclip.model.EndRound;
+import com.valorant.clip.editor.valorantclip.model.TripleKill;
+import com.valorant.clip.editor.valorantclip.model.QuadraKill;
+import com.valorant.clip.editor.valorantclip.model.Ace;
+import com.valorant.clip.editor.valorantclip.model.ClipEvent;
+import com.valorant.clip.editor.valorantclip.model.AgentDetectedEvent;
+import com.valorant.clip.editor.valorantclip.service.WebSocketService;
+import com.valorant.clip.editor.valorantclip.model.FrameAgentDetectionEvent;
+//declare any global variables here
+
+
+declare FrameAgentDetectionEvent
+	@role( event )
+	@timestamp ( time )
+	
+	
+	
+	
+end
+
+declare Kill
+  @role( event )
+  @timestamp ( time )
+  
+  
+  
+end
+
+declare Round
+  @role( event )
+end
+
+declare TripleKill
+  @role( event )
+end
+
+declare QuadraKill
+  @role( event )
+end
+
+declare AgentDetectedEvent
+	@role( event )
+	@expires( 1s )
+end
+
+
+
+rule "Round"
+    when
+        $r : Round()
+    then
+        System.out.println("Round started");
+
+end
+
+rule "Kill"
+    when
+        $k : Kill(!hasFrames, killer.equals("breach"))
+        $list : List(size > 0) from collect (FrameAgentDetectionEvent(this before[0,2] $k)) 
+    then
+    	System.out.println($k);
+        System.out.println($list);
+        modify($k){setHasFrames(true)}
+      
+       // System.out.println("Kill happend");
+       //$list : List(size > 0) from collect (FrameAgentDetectionEvent(time > $ktime - 1 && time <= $ktime)) 
+
+end
+
+rule "Kill and agent"
+    when
+        $k : Kill()
+        accumulate($fa : FrameAgentDetectionEvent() over window:time(1s);
+            $set: collectSet( $fa ))
+          
+    then
+        //System.out.println($k);
+        //System.out.println($set);
+end
+
+rule "Kill during Round"
+    when
+    	$round : Round()
+        $k : Kill(this after $round)
+    then
+       // System.out.println("Kill happend during round");
+       
+end
+
+rule "Manually remove round"
+	when
+		$round : Round()
+		$endRound : EndRound()
+		$clipEvent : ClipEvent()
+	then
+		delete($round);
+		System.out.println($clipEvent);
+		WebSocketService.send($clipEvent);
+		System.out.println("GOTOV");
+		
+end
+
+rule "Triple kill during Round"
+    when
+    	$round : Round()
+    	$list : List(size == 3) from collect (Kill(this after $round))
+    	accumulate(Kill(this after $round, $time : time), $minimum : min($time), $maximum : max($time))
+    then
+        System.out.println("Triple Kill");
+        insert(new TripleKill(($minimum - 3), ($maximum + 2)));
+
+end
+
+rule "Quadra kill during Round"
+    when
+    	$tKill : TripleKill()
+    	$kill : Kill(this after $tKill)
+    then
+        System.out.println("Quadra Kill");
+        delete($tKill);
+        insert(new QuadraKill($tKill.getStartTime(), ($kill.getTime()+2)));
+
+end
+
+rule "Ace during Round"
+    when
+    	$qKill : QuadraKill()
+    	$kill : Kill(this after $qKill)
+    then
+    	delete($qKill);
+    	insert(new Ace($qKill.getStartTime(),($kill.getTime()+2)));
+        System.out.println("ACE!!!");
+
+end
+
+
