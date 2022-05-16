@@ -19,7 +19,7 @@ def check_kill_feed(frame,listTemplate):
     try:
         hits = matchTemplates(listTemplate,
                         frame,
-                        score_threshold=0.7,
+                        score_threshold=0.8,
                         searchBox=region,
                         method=cv2.TM_CCOEFF_NORMED,
                         maxOverlap=0.1)
@@ -53,19 +53,18 @@ def kf_thread(queue):
 
   
 def ally_or_enemy(bbox,frame):
-  lower_red = np.array([155,25,0])
-  upper_red = np.array([179,255,255])
   
   print("----------------------------------------------------")
   print(bbox[0],bbox[1], bbox[2],bbox[3])
   print("----------------------------------------------------")
-  frame = frame[bbox[1] - 20:(bbox[1] + bbox[2]) + 20, 1491:1900]
+  frame = frame[bbox[1] - 10:(bbox[1] + bbox[2]) + 10, 1491:1900]
   
   image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
   mask1 = cv2.inRange(image, (0,50,20), (5,255,255))
   mask2 = cv2.inRange(image, (175,50,20), (180,255,255))
   #mask = cv2.inRange(image, lower_red, upper_red)
   mask = cv2.bitwise_or(mask1, mask2 )
+  cv2.imshow("w", frame)
   cv2.imshow("w", mask)
   cv2.waitKey()
   
@@ -76,7 +75,8 @@ def create_kill_event(hits, killEvents, frameTime, frame):
     return killEvents
   for _,hit in hits.iterrows():
     for _,hit2 in hits.iterrows():
-      ally_or_enemy(hit2["BBox"], frame)
+      
+      
       #print(hit)
       if(hit["TemplateName"] != hit2["TemplateName"] and abs(hit["BBox"][1] - hit2["BBox"][1]) <= 10):
         killer = ""
@@ -91,8 +91,10 @@ def create_kill_event(hits, killEvents, frameTime, frame):
           defeated = hitInfo[0]
         killEvent = killer + " Killed: " + defeated
         if killEvent not in killEvents:
+          ally_or_enemy(hit["BBox"], frame)
+          ally_or_enemy(hit2["BBox"], frame)
           killEvents.append(killEvent)
           ke = KillEvent(killer=killer,defeated=defeated,time=frameTime)
           print(ke.__dict__)
-          requests.post('http://localhost:8080/api/events/postKill', json = ke.__dict__)
+          #requests.post('http://localhost:8080/api/events/postKill', json = ke.__dict__)
   return killEvents

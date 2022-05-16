@@ -54,7 +54,7 @@ def ff_reader(queue):
 
 def video_reader(queueKF,queueBF,queueAD):
   print("Started reading the video....")
-  cap = cv2.VideoCapture('Spike-rush_Trim.mp4')
+  cap = cv2.VideoCapture('C://Users//kopan//Desktop//Spike-rush_Trim.mp4')
   fps = cap.get(cv2.CAP_PROP_FPS)
 
   frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
