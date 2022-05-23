@@ -33,6 +33,7 @@ public class EventController {
 	@RequestMapping(value = "/endRound", method = RequestMethod.POST)
 	public ResponseEntity<?> postEndRound(@RequestBody EndRound endRound) {
 		kieSessionService.insertEndRound(null);
+		System.out.println("END");
 		return new ResponseEntity<String>("ok", HttpStatus.OK);
 	}
 	

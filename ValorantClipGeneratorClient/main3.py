@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import pandas as pd
+
 from killFeedDetection import *
 
 
@@ -23,7 +24,7 @@ def read():
 
 def readVideo():
     print("Started")
-    cap = cv2.VideoCapture('C://Users//kopan//Desktop//Spike-rush_Trim.mp4')
+    cap = cv2.VideoCapture('C://Users//kopan//Desktop//Spike-rush_Trim_round3.mp4')
     fps = cap.get(cv2.CAP_PROP_FPS)
     if(cap.isOpened()== False):
         print("Error opening video stream or file")

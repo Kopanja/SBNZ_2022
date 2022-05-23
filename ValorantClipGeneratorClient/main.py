@@ -26,6 +26,9 @@ class MSG(object):
         self.content = sp[0]
         self.message = ''.join(sp[7:])[0:-1] 
 
+class Round:
+  def __init__(self) -> None:
+      pass
 
 class ClipEvent:
   def __init__(self, startTime, endTime, title) -> None:
@@ -54,9 +57,9 @@ def ff_reader(queue):
 
 def video_reader(queueKF,queueBF,queueAD):
   print("Started reading the video....")
-  cap = cv2.VideoCapture('C://Users//kopan//Desktop//Spike-rush_Trim.mp4')
+  cap = cv2.VideoCapture('C://Users//kopan//Desktop//Spike-rush_Trim_round2.mp4')
   fps = cap.get(cv2.CAP_PROP_FPS)
-
+  requests.post('http://localhost:8080/api/events/buyRound', json =Round().__dict__)
   frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
   duration = frame_count/fps
   print(duration)
@@ -65,19 +68,21 @@ def video_reader(queueKF,queueBF,queueAD):
   frame_no = 0
   while(cap.isOpened()):
     ret, frame = cap.read()
-    if frame_no %1000 == 0:
-      print(queueKF.qsize())
-      print(queueBF.qsize())
-      print(queueAD.qsize())
-      print("Radim")
+    #if frame_no %1000 == 0:
+    #  print(queueKF.qsize())
+    #  print(queueBF.qsize())
+    #  print(queueAD.qsize())
+    #  print("Radim")
     if ret == True:
       frame = FrameTime(frame,(cap.get(cv2.CAP_PROP_POS_MSEC)/1000))
       if(queueBF.full() == False):
         queueBF.put(frame)
-      if(queueKF.empty() and queueAD.empty()):
+      if(queueKF.empty()):
         queueKF.put(frame)
+      #if(queueKF.empty() and queueAD.empty()):
+      #  queueKF.put(frame)
         
-        queueAD.put(frame)
+      #  queueAD.put(frame)
     else:
       break
     frame_no +=1
@@ -89,7 +94,7 @@ def video_reader(queueKF,queueBF,queueAD):
 
 def clip_video(clipEvent):
  
-  video = VideoFileClip("xqcAce.mp4")
+  video = VideoFileClip('C://Users//kopan//Desktop//Spike-rush_Trim_round2.mp4')
   clip = video.subclip(clipEvent["startTime"],clipEvent["endTime"])
   clip.write_videofile(clipEvent["title"] + ".mp4")
 
@@ -121,9 +126,9 @@ if __name__ == '__main__':
   #ff_reader(queue)
   videoReaderThread = threading.Thread(target = video_reader, args=(queueKF,queueBF,queueAD))
   killFeedThread = threading.Thread(target=kf_thread, args=(queueKF,))
-  agentDetectionThread = threading.Thread(target=agent_detection_thread, args=(queueAD,))
-  #clipVideoThread = threading.Thread(target=wsThreadFunction,args=())
-  buyPhaseThread = threading.Thread(target=buy_phase_detection_thread, args=(queueBF,))
+  #agentDetectionThread = threading.Thread(target=agent_detection_thread, args=(queueAD,))
+  clipVideoThread = threading.Thread(target=wsThreadFunction,args=())
+  #buyPhaseThread = threading.Thread(target=buy_phase_detection_thread, args=(queueBF,))
   
   #videoReaderThread = multiprocessing.Process(target = video_reader, args=(queue,))
   #killFeedThread = multiprocessing.Process(target=kf_thread, args=(queue,))
@@ -132,16 +137,16 @@ if __name__ == '__main__':
   
   
   
-  #clipVideoThread.start()
+  clipVideoThread.start()
   videoReaderThread.start()  
   killFeedThread.start()
-  buyPhaseThread.start()
-  agentDetectionThread.start()
+  #buyPhaseThread.start()
+  #agentDetectionThread.start()
   
   
   videoReaderThread.join()
   killFeedThread.join()
-  #clipVideoThread.join()
-  agentDetectionThread.join()
-  buyPhaseThread.join()
+  clipVideoThread.join()
+  #agentDetectionThread.join()
+  #buyPhaseThread.join()
   

@@ -5,6 +5,8 @@ public class Kill {
 	private String killer;
 	private String defeated;
 	private boolean hasFrames;
+	private boolean isKillAlly;
+	private boolean isDefeatAlly;
 	private double time;
 
 	
@@ -24,6 +26,19 @@ public class Kill {
 		super();
 		this.killer = killer;
 		this.defeated = defeated;
+		this.time = time;
+	}
+
+	
+
+	public Kill(String killer, String defeated, boolean hasFrames, boolean isKillAlly, boolean isDefeatAlly,
+			double time) {
+		super();
+		this.killer = killer;
+		this.defeated = defeated;
+		this.hasFrames = hasFrames;
+		this.isKillAlly = isKillAlly;
+		this.isDefeatAlly = isDefeatAlly;
 		this.time = time;
 	}
 
@@ -67,11 +82,36 @@ public class Kill {
 		this.hasFrames = hasFrames;
 	}
 
+	
+
+	public boolean isKillAlly() {
+		return isKillAlly;
+	}
+
+
+	public void setKillAlly(boolean isKillAlly) {
+		this.isKillAlly = isKillAlly;
+	}
+
+
+	public boolean isDefeatAlly() {
+		return isDefeatAlly;
+	}
+
+
+	public void setDefeatAlly(boolean isDefeatAlly) {
+		this.isDefeatAlly = isDefeatAlly;
+	}
+
 
 	@Override
 	public String toString() {
-		return "Kill [killer=" + killer + ", defeated=" + defeated + ", time=" + time + "]";
+		return "Kill [killer=" + killer + ", defeated=" + defeated + ", hasFrames=" + hasFrames + ", isKillAlly="
+				+ isKillAlly + ", isDefeatAlly=" + isDefeatAlly + ", time=" + time + "]";
 	}
+
+
+	
 	
 	
 	

@@ -18,19 +18,11 @@ import com.valorant.clip.editor.valorantclip.model.FrameAgentDetectionEvent;
 
 declare FrameAgentDetectionEvent
 	@role( event )
-	@timestamp ( time )
-	
-	
-	
-	
+	@timestamp ( time )	
 end
 
 declare Kill
-  @role( event )
-  @timestamp ( time )
-  
-  
-  
+  @role( event ) 
 end
 
 declare Round
@@ -59,7 +51,7 @@ rule "Round"
         System.out.println("Round started");
 
 end
-
+/*
 rule "Kill"
     when
         $k : Kill(!hasFrames, killer.equals("breach"))
@@ -73,7 +65,8 @@ rule "Kill"
        //$list : List(size > 0) from collect (FrameAgentDetectionEvent(time > $ktime - 1 && time <= $ktime)) 
 
 end
-
+*/
+/*
 rule "Kill and agent"
     when
         $k : Kill()
@@ -84,34 +77,29 @@ rule "Kill and agent"
         //System.out.println($k);
         //System.out.println($set);
 end
-
+*/
 rule "Kill during Round"
     when
     	$round : Round()
         $k : Kill(this after $round)
     then
-       // System.out.println("Kill happend during round");
+       System.out.println("Kill happend during round: " + $k);
        
 end
 
-rule "Manually remove round"
+rule "My Kill"
 	when
 		$round : Round()
-		$endRound : EndRound()
-		$clipEvent : ClipEvent()
-	then
-		delete($round);
-		System.out.println($clipEvent);
-		WebSocketService.send($clipEvent);
-		System.out.println("GOTOV");
-		
+        $k : Kill(this after $round, killer.equals('breach'))
+    then
+    	System.out.println("My Kill happend during round");
 end
 
 rule "Triple kill during Round"
     when
     	$round : Round()
-    	$list : List(size == 3) from collect (Kill(this after $round))
-    	accumulate(Kill(this after $round, $time : time), $minimum : min($time), $maximum : max($time))
+    	$list : List(size == 3) from collect (Kill(this after $round, killer.equals('breach')))
+    	accumulate(Kill(this after $round, $time : time, killer.equals('breach')), $minimum : min($time), $maximum : max($time))
     then
         System.out.println("Triple Kill");
         insert(new TripleKill(($minimum - 3), ($maximum + 2)));
@@ -121,7 +109,7 @@ end
 rule "Quadra kill during Round"
     when
     	$tKill : TripleKill()
-    	$kill : Kill(this after $tKill)
+    	$kill : Kill(this after $tKill, killer.equals('breach'))
     then
         System.out.println("Quadra Kill");
         delete($tKill);
@@ -132,12 +120,25 @@ end
 rule "Ace during Round"
     when
     	$qKill : QuadraKill()
-    	$kill : Kill(this after $qKill)
+    	$kill : Kill(this after $qKill, killer.equals('breach'))
     then
     	delete($qKill);
     	insert(new Ace($qKill.getStartTime(),($kill.getTime()+2)));
         System.out.println("ACE!!!");
+end
 
+
+rule "Send Highlight Clip"
+	when
+		$round : Round()
+		$endRound : EndRound()
+		$clipEvent : ClipEvent()
+	then
+		delete($round);
+		System.out.println($clipEvent);
+		WebSocketService.send($clipEvent);
+		System.out.println("GOTOV");
+		
 end
 
 
