@@ -15,7 +15,7 @@ def crop_buy_phase(frame):
 
 
 def crop_agent_abilities(frame):
-  return frame[973:1060,737:1182]
+  return frame[978:1044,737:1182]
  
 def detect_player_agent(frame):
   frame = crop_agent_abilities(frame)
@@ -65,6 +65,7 @@ def check_buy_phase(frame, orb, bf, bf_des):
     print(len(good))
     if(len(good) >= 30):
       #Treba da se posalje da je buy runda pocela
+      print("Runda je Pocela")
       requests.post('http://localhost:8080/api/events/buyRound', json = Round().__dict__)
       return False
   return True

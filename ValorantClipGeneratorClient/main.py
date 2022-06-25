@@ -77,6 +77,8 @@ def video_reader(queueKF,queueBF,queueAD):
       frame = FrameTime(frame,(cap.get(cv2.CAP_PROP_POS_MSEC)/1000))
       if(queueBF.full() == False):
         queueBF.put(frame)
+      #if(queueKF.full() == False):
+      #  queueKF.put(frame)
       if(queueKF.empty()):
         queueKF.put(frame)
       #if(queueKF.empty() and queueAD.empty()):

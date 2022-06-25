@@ -13,17 +13,29 @@ import com.valorant.clip.editor.valorantclip.model.ClipEvent;
 import com.valorant.clip.editor.valorantclip.model.AgentDetectedEvent;
 import com.valorant.clip.editor.valorantclip.service.WebSocketService;
 import com.valorant.clip.editor.valorantclip.model.FrameAgentDetectionEvent;
+import com.valorant.clip.editor.valorantclip.model.Game;
+import com.valorant.clip.editor.valorantclip.model.MyKill;
+import com.valorant.clip.editor.valorantclip.model.KillPair;
+import org.kie.api.definition.type.PropertyReactive;
+import java.lang.Integer;
 //declare any global variables here
 
+/*
 
 declare FrameAgentDetectionEvent
 	@role( event )
 	@timestamp ( time )	
 end
+*/
 
 declare Kill
   @role( event ) 
 end
+
+declare MyKill
+  @role( event ) 
+end
+
 
 declare Round
   @role( event )
@@ -42,6 +54,45 @@ declare AgentDetectedEvent
 	@expires( 1s )
 end
 
+query "isVictory"()
+ 	$round : Round()
+	$result : List() from collect($k : Kill(this after $round, isDefeatAlly == false))
+	eval($result.size() == 5)
+
+end
+
+query "isDefeat"()
+	$round : Round()
+	$result : List() from collect($k : Kill(this after $round, isDefeatAlly == true))
+	eval($result.size() == 5)
+
+end
+
+
+query "isRoundOver"()
+	isVictory() or isDefeat()
+end
+
+
+
+rule "Last five kills"
+	when
+		Game($myAgent : myAgent) @Watch(!roundsWon, !roundsLost)
+		$kills := List(size>1) from collect(Kill() over window:length(5))
+		forall(
+			$k : Kill() from $kills
+			Kill(this == $k,killer.equals($myAgent), isKillAlly == true)
+		)
+		
+    then
+    	System.out.println("-------------------------------------------");
+    	System.out.println("Last " + $kills.size() + "
+    	 kills are my kills");
+    	System.out.println($kills);
+    	System.out.println("--------------------------------------------");
+end
+	
+
 
 
 rule "Round"
@@ -51,33 +102,7 @@ rule "Round"
         System.out.println("Round started");
 
 end
-/*
-rule "Kill"
-    when
-        $k : Kill(!hasFrames, killer.equals("breach"))
-        $list : List(size > 0) from collect (FrameAgentDetectionEvent(this before[0,2] $k)) 
-    then
-    	System.out.println($k);
-        System.out.println($list);
-        modify($k){setHasFrames(true)}
-      
-       // System.out.println("Kill happend");
-       //$list : List(size > 0) from collect (FrameAgentDetectionEvent(time > $ktime - 1 && time <= $ktime)) 
 
-end
-*/
-/*
-rule "Kill and agent"
-    when
-        $k : Kill()
-        accumulate($fa : FrameAgentDetectionEvent() over window:time(1s);
-            $set: collectSet( $fa ))
-          
-    then
-        //System.out.println($k);
-        //System.out.println($set);
-end
-*/
 rule "Kill during Round"
     when
     	$round : Round()
@@ -87,29 +112,51 @@ rule "Kill during Round"
        
 end
 
+
 rule "My Kill"
+no-loop
 	when
-		$round : Round()
-        $k : Kill(this after $round, killer.equals('breach'))
+		Game($myAgent : myAgent) @Watch(!roundsWon, !roundsLost)
+        $k : Kill(killer.equals($myAgent), isKillAlly == true, $time : time)
     then
-    	System.out.println("My Kill happend during round");
+    	insert(new MyKill($time));
+    	System.out.println("My Kill happend during round aaaaaaaaaaaaaa");
 end
+
+
+rule "Is
+ round over"
+salience -1
+    when
+    	$round : Round()
+        $k : Kill(this after $round)  
+        not EndRound()
+        isRoundOver()
+    then
+       System.out.println("Round is over");
+       insert(new EndRound());
+       kcontext.getKnowledgeRuntime().getAgenda().getAgendaGroup("statistics").setFocus();
+       
+end
+
 
 rule "Triple kill during Round"
     when
     	$round : Round()
-    	$list : List(size == 3) from collect (Kill(this after $round, killer.equals('breach')))
-    	accumulate(Kill(this after $round, $time : time, killer.equals('breach')), $minimum : min($time), $maximum : max($time))
+    	accumulate($k : MyKill(this after $round, $time : time), $minimum : min($time), $maximum : max($time)) and
+    	List(size == 3) from collect ($k : MyKill(this after $round))
+    	
     then
         System.out.println("Triple Kill");
         insert(new TripleKill(($minimum - 3), ($maximum + 2)));
 
 end
 
+
 rule "Quadra kill during Round"
     when
     	$tKill : TripleKill()
-    	$kill : Kill(this after $tKill, killer.equals('breach'))
+    	$kill : MyKill(this after $tKill)
     then
         System.out.println("Quadra Kill");
         delete($tKill);
@@ -120,7 +167,7 @@ end
 rule "Ace during Round"
     when
     	$qKill : QuadraKill()
-    	$kill : Kill(this after $qKill, killer.equals('breach'))
+    	$kill : MyKill(this after $qKill)
     then
     	delete($qKill);
     	insert(new Ace($qKill.getStartTime(),($kill.getTime()+2)));

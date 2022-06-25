@@ -1,0 +1,45 @@
+
+package integracija
+
+import com.valorant.clip.editor.valorantclip.model.MyKill;
+
+rule "Get All My Kills"
+	agenda-group "statistics"
+	when
+		$myKill : MyKill()
+	then
+		System.out.println($myKill);
+end
+
+rule "Round won"
+	agenda-group "statistics"
+	no-loop
+	when
+		$game : Game()
+		isVictory()
+	then
+		modify($game){incrRoundsWon()}
+end
+
+rule "Round Lost"
+	agenda-group "statistics"
+	no-loop
+	when
+		$game : Game()
+		isDefeat()
+	then
+		modify($game){incrRoundsLost()}
+end
+
+rule "print"
+	agenda-group "statistics"
+	salience -1
+	when
+		$game : Game()
+		isVictory()
+	then
+		System.out.println($game);
+end
+
+
+

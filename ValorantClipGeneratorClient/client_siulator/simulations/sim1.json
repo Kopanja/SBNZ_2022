@@ -1,0 +1,17 @@
+
+[
+{"myAgent": "pheonix", "myTeam": ["astra", "neon", "killjoy", "pheonix", "jett"], "enemyTeam": ["chamber", "cypher", "reyna", "brimstone", "viper"]},
+{"killer": "pheonix", "isKillAlly": true, "defeated": "brimstone", "isDefeatAlly": false, "weapon": "frenzy", "isHeadshot": true, "time": 5.635860204696655},
+{"killer": "pheonix", "isKillAlly": true, "defeated": "viper", "isDefeatAlly": false, "weapon": "ghost", "isHeadshot": true, "time": 2.527064323425293},
+{"killer": "pheonix", "isKillAlly": true, "defeated": "chamber", "isDefeatAlly": false, "weapon": "ares", "isHeadshot": true, "time": 4.587850332260132},
+{"killer": "chamber", "isKillAlly": false, "defeated": "killjoy", "isDefeatAlly": true, "weapon": "ares", "isHeadshot": true, "time": 2.0151591300964355},
+
+{"killer": "pheonix", "isKillAlly": true, "defeated": "cypher", "isDefeatAlly": false, "weapon": "knife", "isHeadshot": false, "time": 5.1119489669799805},
+{"killer": "chamber", "isKillAlly": false, "defeated": "astra", "isDefeatAlly": true, "weapon": "ares", "isHeadshot": false, "time": 3.0411548614501953},
+{"killer": "chamber", "isKillAlly": false, "defeated": "neon", "isDefeatAlly": true, "weapon": "odin", "isHeadshot": true, "time": 3.5654923915863037},
+
+
+{"killer": "chamber", "isKillAlly": false, "defeated": "jett", "isDefeatAlly": true, "weapon": "shorty", "isHeadshot": false, "time": 4.074713230133057},
+
+{"killer": "pheonix", "isKillAlly": true, "defeated": "reyna", "isDefeatAlly": false, "weapon": "classic", "isHeadshot": true, "time": 6.1485350131988525}
+]

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.valorant.clip.editor.valorantclip.model.AgentDetectedEvent;
 import com.valorant.clip.editor.valorantclip.model.EndRound;
 import com.valorant.clip.editor.valorantclip.model.FrameAgentDetectionEvent;
+import com.valorant.clip.editor.valorantclip.model.Game;
 import com.valorant.clip.editor.valorantclip.model.Kill;
 import com.valorant.clip.editor.valorantclip.model.Round;
 
@@ -18,12 +19,12 @@ public class KieSessionService {
 	private final KieSession kSession;
 	private final KieContainer kieContainer;
 	
-
+	 
 	@Autowired
 	public KieSessionService(KieContainer kieContainer) {
 		this.kieContainer = kieContainer;
 		this.kSession = kieContainer.newKieSession("ksession-realtime");
-		
+		//this.kSession = kieContainer.newKieSession();
 		new Thread( new Runnable() {
 			  @Override
 			  public void run() {
@@ -53,6 +54,10 @@ public class KieSessionService {
 	public void insertStartRound(Round round) {
 		this.kSession.insert(new Round());
 		
+	}
+	
+	public void insertGameStart(Game game) {
+		this.kSession.insert(game);
 	}
 
 }

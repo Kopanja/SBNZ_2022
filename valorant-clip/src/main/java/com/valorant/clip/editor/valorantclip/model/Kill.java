@@ -1,5 +1,8 @@
 package com.valorant.clip.editor.valorantclip.model;
 
+import org.kie.api.definition.type.Position;
+import org.kie.api.definition.type.PropertyReactive;
+
 public class Kill {
 
 	private String killer;
@@ -84,17 +87,16 @@ public class Kill {
 
 	
 
-	public boolean isKillAlly() {
-		return isKillAlly;
-	}
-
+	public boolean getIsKillAlly() {
+        return isKillAlly;
+    }
 
 	public void setKillAlly(boolean isKillAlly) {
 		this.isKillAlly = isKillAlly;
 	}
 
 
-	public boolean isDefeatAlly() {
+	public boolean getIsDefeatAlly() {
 		return isDefeatAlly;
 	}
 
@@ -103,11 +105,15 @@ public class Kill {
 		this.isDefeatAlly = isDefeatAlly;
 	}
 
+	
 
 	@Override
 	public String toString() {
+		
+		
 		return "Kill [killer=" + killer + ", defeated=" + defeated + ", hasFrames=" + hasFrames + ", isKillAlly="
-				+ isKillAlly + ", isDefeatAlly=" + isDefeatAlly + ", time=" + time + "]";
+		+ isKillAlly + ", isDefeatAlly=" + isDefeatAlly + ", time=" + time + "]";
+		
 	}
 
 

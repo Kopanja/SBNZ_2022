@@ -30,6 +30,6 @@ def check_player(frame,listTemplate):
       pass
   
 if __name__ == '__main__':
-    frame = cv2.imread("FullScreen.png")
+    frame = cv2.imread("C://Users//kopan//Desktop//FullScreenRaze.png")
     listTemplate = createListTemplate()
     print(check_player(frame, listTemplate))
